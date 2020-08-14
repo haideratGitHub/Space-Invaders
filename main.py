@@ -1,5 +1,6 @@
 import pygame
 import random
+import math
 
 # initialize the pygame
 pygame.init()
@@ -25,7 +26,7 @@ playerX_change = 0
 enemyImg = pygame.image.load("monster.png")
 enemyImg = pygame.transform.scale(enemyImg, (60, 60))
 # random enemy coordinates
-enemyX = random.randint(0, 740)
+enemyX = random.randint(0, 730)
 enemyY = random.randint(50, 200)
 enemyX_change = 1
 enemyY_change = 30
@@ -58,6 +59,14 @@ def fire(x, y):
     screen.blit(bulletImg, (x + 16, y + 10))
 
 
+def isCollision(enemyX, enemyY, bulletX, bulletY):
+    distance = math.sqrt((math.pow((enemyX - bulletX), 2)) + (math.pow((enemyY - bulletY), 2)))
+    if distance < 27:
+        return True
+    else:
+        return False
+
+
 # Game loop
 running = True
 while running:
@@ -78,6 +87,7 @@ while running:
                 playerX_change = 2
             if event.key == pygame.K_SPACE:
                 if bullet_state is "ready":
+                    # get the current x coordinate of spaceship
                     bulletX = playerX
                     fire(bulletX, bulletY)
         # check if key is released
@@ -116,6 +126,12 @@ while running:
         fire(bulletX, bulletY)
         bulletY -= bulletY_change
 
+    collision = isCollision(enemyX, enemyY, bulletX, bulletY)
+    if collision:
+        bulletY = 480
+        bullet_state = "ready"
+        enemyX = random.randint(0, 730)
+        enemyY = random.randint(50, 200)
     player(playerX, playerY)
     enemy(enemyX, enemyY)
     pygame.display.update()
