@@ -27,7 +27,7 @@ enemyImg = pygame.transform.scale(enemyImg, (60, 60))
 # random enemy coordinates
 enemyX = random.randint(0, 740)
 enemyY = random.randint(50, 200)
-enemyX_change = 0.2
+enemyX_change = 1
 enemyY_change = 30
 
 # Background image
@@ -46,8 +46,10 @@ def enemy(x, y):
 running = True
 while running:
     # background color
-    screen.fill((0, 0, 128))
+    # screen.fill((0, 0, 128))
 
+    # background image
+    screen.blit(backgroundImg, (0, 0))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -55,9 +57,9 @@ while running:
         if event.type == pygame.KEYDOWN:
             # check if its right key or left key
             if event.key == pygame.K_LEFT:
-                playerX_change = -0.3
+                playerX_change = -2
             if event.key == pygame.K_RIGHT:
-                playerX_change = 0.3
+                playerX_change = 2
         # check if key is released
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
@@ -79,10 +81,10 @@ while running:
 
     # enemy boundary checks
     if enemyX <= 0:
-        enemyX_change = 0.2
+        enemyX_change = 1
         enemyY += enemyY_change
     if enemyX > 730:
-        enemyX_change = -0.2
+        enemyX_change = -1
         enemyY += enemyY_change
 
     player(playerX, playerY)
