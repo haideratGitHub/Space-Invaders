@@ -27,6 +27,8 @@ enemyImg = pygame.transform.scale(enemyImg, (60, 60))
 # random enemy coordinates
 enemyX = random.randint(0, 740)
 enemyY = random.randint(50, 200)
+enemyX_change = 0.2
+enemyY_change = 30
 
 # Background image
 backgroundImg = pygame.image.load("background.jpg")
@@ -63,6 +65,7 @@ while running:
             if event.key == pygame.K_RIGHT:
                 playerX_change = 0
 
+    # player movement
     playerX += playerX_change
 
     # Boundaries
@@ -70,6 +73,17 @@ while running:
         playerX = 0
     if playerX > 736:
         playerX = 736
+
+    # enemy movement
+    enemyX += enemyX_change
+
+    # enemy boundary checks
+    if enemyX <= 0:
+        enemyX_change = 0.2
+        enemyY += enemyY_change
+    if enemyX > 730:
+        enemyX_change = -0.2
+        enemyY += enemyY_change
 
     player(playerX, playerY)
     enemy(enemyX, enemyY)
