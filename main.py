@@ -1,4 +1,5 @@
 import pygame
+import random
 
 # initialize the pygame
 pygame.init()
@@ -20,12 +21,23 @@ playerX = 370
 playerY = 480
 playerX_change = 0
 
+# Enemy
+enemyImg = pygame.image.load("monster.png")
+enemyImg = pygame.transform.scale(enemyImg, (60, 60))
+# random enemy coordinates
+enemyX = random.randint(0, 740)
+enemyY = random.randint(50, 200)
+
 # Background image
 backgroundImg = pygame.image.load("background.jpg")
 
 
-def player(x,y):
+def player(x, y):
     screen.blit(playerImg, (x, y))
+
+
+def enemy(x, y):
+    screen.blit(enemyImg, (x, y))
 
 
 # Game loop
@@ -60,4 +72,5 @@ while running:
         playerX = 736
 
     player(playerX, playerY)
+    enemy(enemyX, enemyY)
     pygame.display.update()
