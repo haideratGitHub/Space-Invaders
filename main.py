@@ -1,6 +1,7 @@
 import pygame
 import random
 import math
+from pygame import mixer
 
 # initialize the pygame
 pygame.init()
@@ -52,6 +53,10 @@ bullet_state = "ready"
 # Background image
 backgroundImg = pygame.image.load("background.jpg")
 
+# Background sound
+mixer.music.load('background-track.mp3')
+mixer.music.play(-1)
+
 # score
 score_value = 0
 font = pygame.font.Font('freesansbold.ttf', 24)
@@ -62,6 +67,12 @@ textY = 10
 def show_score(x, y):
     score = font.render("Score: " + str(score_value), True, (255, 255, 255))
     screen.blit(score, (x, y))
+
+
+def game_over_text():
+    over_font = pygame.font.Font('freesansbold.ttf', 64)
+    over = over_font.render("GAME OVER", True, (255, 255, 255))
+    screen.blit(over, (200, 250))
 
 
 def player(x, y):
@@ -106,6 +117,8 @@ while running:
                 playerX_change = 2
             if event.key == pygame.K_SPACE:
                 if bullet_state is "ready":
+                    bullet_sound = mixer.Sound('shoot.wav')
+                    bullet_sound.play()
                     # get the current x coordinate of spaceship
                     bulletX = playerX
                     fire(bulletX, bulletY)
@@ -128,6 +141,18 @@ while running:
     for i in range(number_of_enemies):
         # enemy movement
         enemyX[i] += enemyX_change[i]
+        # check if enemy and player collided
+        col = isCollision(enemyX[i], enemyY[i], playerX, playerY)
+        if col:
+            for j in range(number_of_enemies):
+                enemyY[j] = 2000
+            game_over_text()
+            break
+        if enemyY[i] > 480:
+            for j in range(number_of_enemies):
+                enemyY[j] = 2000
+            game_over_text()
+            break
         # enemy boundary checks
         if enemyX[i] <= 0:
             enemyX_change[i] = 1.3
@@ -140,6 +165,8 @@ while running:
             bulletY = 480
             bullet_state = "ready"
             score_value += 1
+            enemy_destroy = mixer.Sound('explosion.wav')
+            enemy_destroy.play()
             enemyX[i] = random.randint(0, 730)
             enemyY[i] = random.randint(50, 200)
         enemy(enemyX[i], enemyY[i], i)
