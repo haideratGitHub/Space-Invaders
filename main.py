@@ -12,27 +12,45 @@ screen = pygame.display.set_mode((800, 600))
 # Title
 pygame.display.set_caption("Space Invaders")
 
+# assests directory
+DIR_IMG = "./assests/img/"
+DIR_SOUND = "./assests/sounds/"
+
 # Icon
-icon = pygame.image.load("rocket.png")
+icon = pygame.image.load(DIR_IMG + "rocket.png")
 pygame.display.set_icon(icon)
 
 # Player
-playerImg = pygame.image.load("player.png")
+playerImg = pygame.image.load(DIR_IMG + "player.png")
 playerImg = pygame.transform.scale(playerImg, (64, 64))
 playerX = 370
 playerY = 480
 playerX_change = 0
 
 # Enemy
-Enemies = ["monster.png", "monster1.png", "monster2.png", "monster3.png", "monster4.png"]
 enemyImg = []
 enemyX = []
 enemyY = []
 enemyX_change = []
 enemyY_change = []
 number_of_enemies = 5
+ENEMY_MOVEMENT_X = 1.3
+
+# enemy fire ball
+fireImg = []
+fireX = []
+fireY = []
+fireX_change = []
+fireY_change = []
+fire_state = []
+FIRE_MOVEMENT_X = 0
+FIRE_MOVEMENT_Y = 3
+number_of_fires = 1  # these will increase as level goes up
+time_interval_between_fires = 3  # this will decrease as level goes up
+starting_time_for_fire = pygame.time.get_ticks()
 
 
+# enemy respawning random coordinates
 def respawn_coor_x():
     return random.randint(0, 730)
 
@@ -42,16 +60,25 @@ def respawn_coor_y(x):
 
 
 for i in range(number_of_enemies):
-    enemyImg.append(pygame.image.load("monster1.png"))
+    enemyImg.append(pygame.image.load(DIR_IMG + "monster1.png"))
     enemyImg[i] = pygame.transform.scale(enemyImg[i], (50, 50))
+    fireImg.append(pygame.image.load(DIR_IMG + "enemy_fire.png"))
+    fireImg[i] = pygame.transform.scale(fireImg[i], (24, 24))
     # random enemy coordinates
-    enemyX.append(respawn_coor_x())
-    enemyY.append(respawn_coor_y(i * 50))
-    enemyX_change.append(1.3)
+    x = respawn_coor_x()
+    y = respawn_coor_y(i * 50)
+    enemyX.append(x)
+    enemyY.append(y)
+    fireX.append(x)
+    fireY.append(y)
+    enemyX_change.append(ENEMY_MOVEMENT_X)
     enemyY_change.append(35)
+    fireX_change.append(FIRE_MOVEMENT_X)
+    fireY_change.append(FIRE_MOVEMENT_Y)
+    fire_state.append("ready")
 
 # Bullet
-bulletImg = pygame.image.load("bullet.png")
+bulletImg = pygame.image.load(DIR_IMG + "bullet.png")
 bulletX = 0
 bulletY = 480
 bulletX_change = 0
@@ -61,10 +88,10 @@ bulletY_change = 6
 bullet_state = "ready"
 
 # Background image
-backgroundImg = pygame.image.load("background.jpg")
+backgroundImg = pygame.image.load(DIR_IMG + "background.jpg")
 
 # Background sound
-mixer.music.load('background-track.mp3')
+mixer.music.load(DIR_SOUND+'background-track.mp3')
 mixer.music.play(-1)
 
 # score
@@ -105,10 +132,14 @@ def enemy(x, y, i):
     screen.blit(enemyImg[i], (x, y))
 
 
-def fire(x, y):
+def fire_bullet(x, y):
     global bullet_state
     bullet_state = "fire"
     screen.blit(bulletImg, (x + 16, y + 10))
+
+
+def fire_by_enemy(x, y):
+    screen.blit(fireImg[0], (x + 14, y + 17))
 
 
 def isCollision(enemyX, enemyY, bulletX, bulletY):
@@ -121,6 +152,12 @@ def isCollision(enemyX, enemyY, bulletX, bulletY):
 
 def level_up():
     global level
+    global number_of_fires
+    global time_interval_between_fires
+    global ENEMY_MOVEMENT_X
+    ENEMY_MOVEMENT_X += 0.2
+    time_interval_between_fires -= 1
+    number_of_fires += 1
     level += 1
     show_level(levelX, levelY)
 
@@ -145,11 +182,11 @@ while running:
                 playerX_change = 2
             if event.key == pygame.K_SPACE:
                 if bullet_state is "ready":
-                    bullet_sound = mixer.Sound('shoot.wav')
+                    bullet_sound = mixer.Sound(DIR_SOUND+'shoot.wav')
                     bullet_sound.play()
                     # get the current x coordinate of spaceship
                     bulletX = playerX
-                    fire(bulletX, bulletY)
+                    fire_bullet(bulletX, bulletY)
         # check if key is released
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT:
@@ -159,7 +196,6 @@ while running:
 
     # player movement
     playerX += playerX_change
-
     # Boundaries
     if playerX <= 0:
         playerX = 0
@@ -167,9 +203,10 @@ while running:
         playerX = 736
 
     # check if one track completed then increase level
-    if ((pygame.time.get_ticks() - starter_time)/1000) > 5:
+    if ((pygame.time.get_ticks() - starter_time) / 1000) > 61:
         level_up()
         starter_time = pygame.time.get_ticks()
+
     for i in range(number_of_enemies):
         # enemy movement
         enemyX[i] += enemyX_change[i]
@@ -187,17 +224,17 @@ while running:
             break
         # enemy boundary checks
         if enemyX[i] <= 0:
-            enemyX_change[i] = 1.3
+            enemyX_change[i] = ENEMY_MOVEMENT_X
             enemyY[i] += enemyY_change[i]
         if enemyX[i] > 730:
-            enemyX_change[i] = -1.3
+            enemyX_change[i] = -ENEMY_MOVEMENT_X
             enemyY[i] += enemyY_change[i]
         collision = isCollision(enemyX[i], enemyY[i], bulletX, bulletY)
         if collision:
             bulletY = 480
             bullet_state = "ready"
             score_value += 1
-            enemy_destroy = mixer.Sound('explosion.wav')
+            enemy_destroy = mixer.Sound(DIR_SOUND+'explosion.wav')
             enemy_destroy.play()
             enemyX[i] = respawn_coor_x()
             enemyY[i] = respawn_coor_y(i * 50)
@@ -209,10 +246,37 @@ while running:
         bullet_state = "ready"
     # bullet movement
     if bullet_state is "fire":
-        fire(bulletX, bulletY)
+        fire_bullet(bulletX, bulletY)
         bulletY -= bulletY_change
+
+    if ((pygame.time.get_ticks() - starting_time_for_fire) / 1000) > time_interval_between_fires:
+        starting_time_for_fire = pygame.time.get_ticks()
+        for i in range(number_of_fires):
+            # which enemy will fire
+            which_enemy_fire = random.randint(0, 4)
+            if fire_state[which_enemy_fire] is "ready" and enemyY[which_enemy_fire] > 0:
+                fireX[which_enemy_fire] = enemyX[which_enemy_fire]
+                fireY[which_enemy_fire] = enemyY[which_enemy_fire]
+                fire_by_enemy(fireX[which_enemy_fire], fireY[which_enemy_fire])
+                fire_state[which_enemy_fire] = "fire"
+
+    for i in range(number_of_enemies):
+        if fire_state[i] is "fire" and enemyY[i] > 0:
+            fire_by_enemy(fireX[i], fireY[i])
+            fireY[i] += fireY_change[i]
+            hit_player = isCollision(playerX, playerY, fireX[i], fireY[i])
+            if hit_player:
+                fireY[i] = 2000
+                player_killed = mixer.Sound(DIR_SOUND+"invaderkilled.wav")
+                player_killed.play()
+                for j in range(number_of_enemies):
+                    enemyY[j] = 2000
+                game_over_text()
+                break
+        if fireY[i] > 800:
+            fire_state[i] = "ready"
 
     player(playerX, playerY)
     show_score(textX, textY)
-    show_level(levelX,levelY)
+    show_level(levelX, levelY)
     pygame.display.update()
