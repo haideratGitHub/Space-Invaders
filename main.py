@@ -24,6 +24,7 @@ playerY = 480
 playerX_change = 0
 
 # Enemy
+Enemies = ["monster.png", "monster1.png", "monster2.png", "monster3.png", "monster4.png"]
 enemyImg = []
 enemyX = []
 enemyY = []
@@ -31,12 +32,21 @@ enemyX_change = []
 enemyY_change = []
 number_of_enemies = 5
 
+
+def respawn_coor_x():
+    return random.randint(0, 730)
+
+
+def respawn_coor_y(x):
+    return random.randint(0, 20) - x
+
+
 for i in range(number_of_enemies):
-    enemyImg.append(pygame.image.load("monster.png"))
-    enemyImg[i] = pygame.transform.scale(enemyImg[i], (60, 60))
+    enemyImg.append(pygame.image.load("monster1.png"))
+    enemyImg[i] = pygame.transform.scale(enemyImg[i], (50, 50))
     # random enemy coordinates
-    enemyX.append(random.randint(0, 730))
-    enemyY.append(random.randint(50, 200))
+    enemyX.append(respawn_coor_x())
+    enemyY.append(respawn_coor_y(i * 50))
     enemyX_change.append(1.3)
     enemyY_change.append(35)
 
@@ -63,10 +73,22 @@ font = pygame.font.Font('freesansbold.ttf', 24)
 textX = 10
 textY = 10
 
+# starting level
+level = 1
+levelX = 700
+levelY = 10
+# starting time
+starter_time = pygame.time.get_ticks()
+
 
 def show_score(x, y):
     score = font.render("Score: " + str(score_value), True, (255, 255, 255))
     screen.blit(score, (x, y))
+
+
+def show_level(x, y):
+    lvl = font.render("Level: " + str(level), True, (255, 255, 255))
+    screen.blit(lvl, (x, y))
 
 
 def game_over_text():
@@ -95,6 +117,12 @@ def isCollision(enemyX, enemyY, bulletX, bulletY):
         return True
     else:
         return False
+
+
+def level_up():
+    global level
+    level += 1
+    show_level(levelX, levelY)
 
 
 # Game loop
@@ -138,6 +166,10 @@ while running:
     if playerX > 736:
         playerX = 736
 
+    # check if one track completed then increase level
+    if ((pygame.time.get_ticks() - starter_time)/1000) > 5:
+        level_up()
+        starter_time = pygame.time.get_ticks()
     for i in range(number_of_enemies):
         # enemy movement
         enemyX[i] += enemyX_change[i]
@@ -167,8 +199,8 @@ while running:
             score_value += 1
             enemy_destroy = mixer.Sound('explosion.wav')
             enemy_destroy.play()
-            enemyX[i] = random.randint(0, 730)
-            enemyY[i] = random.randint(50, 200)
+            enemyX[i] = respawn_coor_x()
+            enemyY[i] = respawn_coor_y(i * 50)
         enemy(enemyX[i], enemyY[i], i)
 
     # check if previous bullet is out of screen/hit
@@ -182,4 +214,5 @@ while running:
 
     player(playerX, playerY)
     show_score(textX, textY)
+    show_level(levelX,levelY)
     pygame.display.update()
