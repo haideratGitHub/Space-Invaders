@@ -27,7 +27,7 @@ You can watch the gameplay demo [here](https://youtu.be/9g9Mxdggx1s)
 
 ## Contact
 
-[![Portfolio](https://img.shields.io/badge/Portfolio-Haider-yellowgreen)]((http://haider.codes/))
+[![Portfolio](https://img.shields.io/badge/Portfolio-Haider-yellowgreen)](http://haider.codes/)
 
 Thanks for checking out my game and I hope you enjoy it! Feel free to contact me.
 Regards
